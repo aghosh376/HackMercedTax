@@ -6,6 +6,7 @@ import numpy as np
 from PIL import Image
 import requests
 
+# bs comment
 
 st.header("Hello World", divider='blue')
 
@@ -17,14 +18,17 @@ st.markdown("This is a markdown text")
 col1, col2 = st.columns(2)
 
 with col1:
-    x =st.slider("Select a value", 1, 10)
+    x_slider =st.slider("Select a value", 1, 10)
+    st.write("This is col 1")
 with col2:
-    st.write("The value of :blue[***x***] is ", x)
+    st.write("The value of :blue[***x***] is ", x_slider)
+    st.write("This is col 2")
 
 st.write("Here's our first attempt at using data to create a table:")
+st.write("Col 2 is col 1 x 10 x slider value")
 st.write(pd.DataFrame({
     'first column': [1, 2, 3, 4],
-    'second column': [10, 20, 30, 40]
+    'second column': [10*x_slider, 20*x_slider, 30*x_slider, 40*x_slider]
 }))
 
 dataframe = np.random.randn(10, 20)
@@ -44,6 +48,9 @@ add_selectbox = st.sidebar.selectbox(
     'How would you like to be contacted?',
     ('Email', 'Home phone', 'Mobile phone')
 )
+
+# This should display the value under selectbox in the sidebar
+st.sidebar.write("You want to be contacted through", add_selectbox)
 
 # Add a slider to the sidebar:
 add_slider = st.sidebar.slider(
@@ -83,14 +90,14 @@ tab2.image(image, use_column_width=True)
     
 df = pd.DataFrame({
     'first column': [1, 2, 3, 4],
-    'second column': [10, 20, 30, 40]
+    'second column': [10*x_slider, 20*x_slider, 30*x_slider, 40*x_slider]
     })
 
-option = st.selectbox(
+num_option = st.selectbox(
     'Which number do you like best?',
      df['first column'])
 
-'You selected: ', option
+'You selected: ', num_option
 
 if st.checkbox('Show dataframe'):
     chart_data = pd.DataFrame(
