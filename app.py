@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.hello("Hello World")
+st.write("Hello World")
 
 st.header("This is a header with a divider", divider='rainbow')
 st.subheader("This is a subheader")
