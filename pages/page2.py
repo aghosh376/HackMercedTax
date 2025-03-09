@@ -10,7 +10,7 @@ st.title("Gemini 2.0 Flash Analysis")
 with open("prompts/message.txt", 'r') as file:
     prompt = file.read()
 
-uploaded_file = st.file_uploader("Upload a file for analysis")
+uploaded_file = st.file_uploader("Upload a file for analysis", type=["pdf"])
 
 if st.button("Analyze"):
     contents = []

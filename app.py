@@ -5,6 +5,10 @@ import time
 import numpy as np
 from PIL import Image
 import requests
+import config
+
+if 'api_key' not in st.session_state:
+    st.session_state.api_key = config.api
 
 # Define the pages
 page_1 = st.Page("pages/page1.py", title="Page 1", icon="❄️")
