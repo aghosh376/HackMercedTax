@@ -33,13 +33,29 @@ if st.button("Analyze"):
         # Add file reference correctly
         contents.append(file)
 
+    st.write(contents)
+    
     # Ensure there's something to send
     if contents:
         response = client.models.generate_content(
             model="gemini-2.0-flash",
-            contents=contents
+            contents=contents[0]
         )
         st.write("Analysis Result:")
         st.write(response.text)
     else:
         st.warning("Please provide a prompt or upload a file for analysis.")
+
+reply = st.text_input("Your reply: ")
+
+if st.button("Reply"):
+    if reply:
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents={"text": reply}
+        )
+        st.write("Analysis Result:")
+        st.write(response.text)
+    else:
+        st.warning("Please provide a prompt valid prompt.")
+
