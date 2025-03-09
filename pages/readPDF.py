@@ -9,15 +9,15 @@ import config
 API_KEY = config.api 
 client = Client(api_key=API_KEY)
 
-
-reader = PdfReader("TaxForms/W-2_Tax_Form_2024.pdf")
-page = reader.pages[0]
-
-st.write(page.extract_text())
-if '1545-0008' in page.extract_text():
-    st.write("W-2 form found")
-    
-pdf_viewer("TaxForms/2024_Form_1040.pdf")
+st.title("Tax Form Reader")
+#reader = PdfReader("TaxForms/W-2_Tax_Form_2024.pdf")
+#page = reader.pages[0]
+#
+#st.write(page.extract_text())
+#if '1545-0008' in page.extract_text():
+#    st.write("W-2 form found")
+#    
+#pdf_viewer("TaxForms/2024_Form_1040.pdf")
 
 
 
@@ -172,44 +172,50 @@ test_values = {
     "f2_33[0]": "value76"
 }
 
-filled = fill_pdf("TaxForms/ScheduleCEng.pdf", test_values)
+#filled = fill_pdf("TaxForms/ScheduleCEng.pdf", test_values)
 
-with open("outputs/filled.pdf", "wb+") as output:
-    output.write(filled.read())
-    pdf_viewer("outputs/filled.pdf")
+#with open("outputs/filled.pdf", "wb+") as output:
+#    output.write(filled.read())
+#    pdf_viewer("outputs/filled.pdf")
 
-def extract_text_from_pdf(pdf_path):
-    reader = PdfReader(pdf_path)
+def extract_text_from_pdf(uploaded_file):
+    reader = PdfReader(uploaded_file)
     
     text = ""
     for page in reader.pages:
         text += page.extract_text()
     return text
 
-def extract_information_with_llm(text, field_structure):
+def extract_information_with_llm(uploaded_file, field_structure):
     # Creating a prompt to extract the data in the required structure
-    prompt = f"Extract information from the following text and map it to the provided field structure. Fields: {field_structure}\n\nText:\n{text}"
+    prompt = f"Extract information from the following text and map it to the provided field structure. Fields: {field_structure}\n\n"
+    contents = [
+       {"text": prompt}
+    ]
+    
+    file = client.files.upload(file=uploaded_file, config=dict(mime_type='application/pdf'))
 
-    try:
-        # Calling the Gemini API to generate the content
-        response = client.models.generate_text(
-            model="gemini-2.0-flash",  # You can change the model name if necessary
-            prompt=prompt,
-            temperature=0.7,
-            max_output_tokens=1500
-        )
-        st.write("Raw Response from Gemini API:", response)
-        # Extracting the generated text from the response
-        return 
+    # Add file reference correctly
+    contents.append(file)
+    # Calling the Gemini API to generate the content
+    response = client.models.generate_content(
+        model="gemini-2.0-flash", contents=contents[0], config={
+        'response_mime_type': 'application/json',
+        'response_schema': field_structure,
+    },
+    )
+    st.write("Raw Response from Gemini API:", response)
+    # Extracting the generated text from the response
+    return response.text
 
-    except Exception as e:
-        print(f"Error: {str(e)}")
-        return None
+   # except Exception as e:
+    #    print(f"Error: {str(e)}")
+    #    return None
 
 # Function to parse the extracted data and fill it into the dictionary
-def fill_fields(pdf_path, field_structure):
-    text = extract_text_from_pdf(pdf_path)
-    filled_data = extract_information_with_llm(text, field_structure)
+def fill_fields(uploaded_file, field_structure):
+    text = extract_text_from_pdf(uploaded_file)
+    filled_data = extract_information_with_llm(uploaded_file, field_structure)
     
     return filled_data
 
