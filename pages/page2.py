@@ -7,7 +7,9 @@ API_KEY = config.api
 client = genai.Client(api_key=API_KEY)
 
 st.title("Gemini 2.0 Flash Analysis")
-prompt = st.text_input("Enter your prompt:")
+with open("prompts/message.txt", 'r') as file:
+    prompt = file.read()
+
 uploaded_file = st.file_uploader("Upload a file for analysis")
 
 if st.button("Analyze"):
@@ -26,7 +28,7 @@ if st.button("Analyze"):
 
         # Upload file to Google GenAI
         file_data = uploaded_file.read()  # Read file as bytes
-        file = client.files.upload(file=file_data, mime_type=mime_type)
+        file = client.files.upload(file=uploaded_file, config=dict(mime_type='application/pdf'))
 
         # Add file reference correctly
         contents.append(file)
