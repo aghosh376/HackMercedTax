@@ -4,38 +4,40 @@ from google import genai
 import config
 
 API_KEY = config.api
-
 client = genai.Client(api_key=API_KEY)
 
-st.write("Hello World \n\nThis is page 1 of many")
+st.title("Gemini 2.0 Flash Analysis")
+prompt = st.text_input("Enter your prompt:")
+uploaded_file = st.file_uploader("Upload a file for analysis")
 
-prompt = st.text_input("Enter a prompt for Gemini 2.0")
-fileUpload = st.file_uploader("Please input a file")
+if st.button("Analyze"):
+    contents = []
+    
+    # Add text prompt
+    if prompt:
+        contents.append({"text": prompt})
+    
+    # Handle file upload
+    if uploaded_file is not None:
+        # Guess MIME type
+        mime_type, _ = mimetypes.guess_type(uploaded_file.name)
+        if mime_type is None:
+            mime_type = "application/octet-stream"  # Default if unknown
 
-if st.checkbox("I want to only look at my prompt response"):
-    response1 = client.models.generate_content(
-        model="gemini-2.0-flash",
-        contents=prompt
-    )
-    st.write(f"Below is Google Gemini 2.0 flash's response to '{prompt}'")
-    st.write(response1.text)
-    st.write("End Gemini")
+        # Upload file to Google GenAI
+        file_data = uploaded_file.read()  # Read file as bytes
+        file = client.files.upload(file=file_data, mime_type=mime_type)
 
-if fileUpload is not None:
-    mime_type, _ = mimetypes.guess_type(fileUpload.name)
-    if mime_type is None:
-        mime_type = "application/octet-stream"
+        # Add file reference correctly
+        contents.append(file)
 
-    file = client.files.upload(file=fileUpload, mime_type=mime_type)
-
-    if st.checkbox("I want to see the response to my prompt and file"):
-        response2 = client.models.generate_content(
+    # Ensure there's something to send
+    if contents:
+        response = client.models.generate_content(
             model="gemini-2.0-flash",
-            contents=[{"text": prompt}, {"file": file.name}]
+            contents=contents
         )
-        st.write(f"Below is Google Gemini 2.0 flash's response to your prompt '{prompt}' and file upload")
-        st.write(response2.text)
-        st.write("End Gemini")
-else:
-    st.write("Please upload a file to proceed with a file response.")
-
+        st.write("Analysis Result:")
+        st.write(response.text)
+    else:
+        st.warning("Please provide a prompt or upload a file for analysis.")
